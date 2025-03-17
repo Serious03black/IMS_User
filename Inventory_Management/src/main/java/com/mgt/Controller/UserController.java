@@ -1,0 +1,37 @@
+package com.mgt.Controller;
+
+import com.mgt.Model.User;
+import com.mgt.Repository.UserRepo;
+import com.mgt.Service.UserService;
+import com.mgt.dto.LoginRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+
+    @PostMapping("/register")
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
+        User newUser = userService.addUser(user);
+        return ResponseEntity.ok(newUser);
+    }
+
+    @PostMapping("/login")
+    public String loginUser(@RequestBody LoginRequest loginRequest) {
+        //System.out.println("Email: " + loginRequest.getEmail());
+        //System.out.println("Password: " + loginRequest.getPassword());
+        User user = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
+
+        if (user != null) {
+            return "Login Successfully";
+        } else {
+            return "Login Failed ... Plz Enter valid email and password";
+        }
+    }
+}
