@@ -26,4 +26,18 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+
+    @Override
+    public boolean updateProfile(User user) {
+
+        boolean status = false;
+        try {
+            userRepo.save(user);
+            status = true;
+        }catch(Exception e){
+            e.printStackTrace();
+            status = false;
+        }
+        return status;
+    }
 }

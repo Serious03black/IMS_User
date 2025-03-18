@@ -34,4 +34,14 @@ public class UserController {
             return "Login Failed ... Plz Enter valid email and password";
         }
     }
+
+    @PutMapping("/update")
+    public String updatePro(@RequestBody User user){
+        boolean result = userService.updateProfile(user);
+        if(result) {
+            return "Profile update successfully";
+        }else{
+            return "Profile does not update";
+        }
+    }
 }

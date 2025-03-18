@@ -8,4 +8,5 @@ public interface UserService {
 
     public User loginUser(String email , String password);
 
+    public boolean updateProfile(User user);
 }
