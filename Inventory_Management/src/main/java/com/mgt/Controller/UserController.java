@@ -37,6 +37,14 @@ public class UserController {
 
     @PutMapping("/update")
     public String updatePro(@RequestBody User user){
+
+        /*
+        System.out.println("Name : " + user.getName());
+        System.out.println("Phone No :" + user.getPhone_no());
+        System.out.println("Email : " + user.getEmail());
+        System.out.println("Password : " + user.getPassword());
+        */
+
         boolean result = userService.updateProfile(user);
         if(result) {
             return "Profile update successfully";

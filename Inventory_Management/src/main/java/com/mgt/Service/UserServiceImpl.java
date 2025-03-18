@@ -29,8 +29,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean updateProfile(User user) {
-
         boolean status = false;
+        /*
         try {
             userRepo.save(user);
             status = true;
@@ -38,6 +38,16 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             status = false;
         }
+        */
+
+        if (user != null) {
+            userRepo.save(user);
+            status = true;
+        } else {
+            status = false;
+        }
         return status;
+
     }
+
 }
