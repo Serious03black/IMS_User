@@ -18,14 +18,24 @@ public class User {
     private Integer id;
 
     @Column(name="name")
-    private String name;
+    private String full_name;
 
+    /*
     @Column(name="phone_no")
     private String phone_no;
+*/
+    @Column(name="store_type")
+    private String store_type;
+
+    @Column(name="user_role")
+    private String user_role;
 
     @Column(name="email")
     private String email;
 
     @Column(name="password")
     private String password;
+
+    @Transient
+    private String confirm_password;
 }
