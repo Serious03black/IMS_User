@@ -10,5 +10,5 @@ public interface UserService {
 
     public boolean updateProfile(User user);
 
-    User forgetPass(String email, String oldPassword, String newPassword);
+    User forgetPass(String email, String newPassword, String confirmPassword);
 }

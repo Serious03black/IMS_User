@@ -16,7 +16,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         User newUser = userService.addUser(user);
@@ -56,10 +55,10 @@ public class UserController {
     public String resetPass(@RequestBody ResetPassword resetPassword){
 
         System.out.println("Email : " + resetPassword.getEmail());
-        System.out.println("Old Password : " + resetPassword.getOldPassword());
-        System.out.println("New Password : " + resetPassword.getNewPassword());
+        System.out.println("Old Password : " + resetPassword.getNewPassword());
+        System.out.println("New Password : " + resetPassword.getConfirmPassword());
 
-        User user = userService.forgetPass(resetPassword.getEmail() , resetPassword.getOldPassword() , resetPassword.getNewPassword());
+        User user = userService.forgetPass(resetPassword.getEmail() , resetPassword.getNewPassword() , resetPassword.getConfirmPassword());
 
         if(user != null){
             return "Password updated successfully";

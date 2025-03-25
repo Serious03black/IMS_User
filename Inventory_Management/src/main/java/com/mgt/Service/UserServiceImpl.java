@@ -5,6 +5,7 @@ import com.mgt.Repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -51,10 +52,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User forgetPass(String email, String oldPassword, String newPassword) {
+    public User forgetPass(String email , String newPassword , String confirmPassword) {
 
         User validUser = userRepo.findByEmail(email);
-        if(validUser != null && validUser.getPassword().matches(oldPassword)){
+        if(validUser != null  && Objects.equals(newPassword, confirmPassword)){
             validUser.setPassword(newPassword);   // set new password to old password
             return userRepo.save(validUser);      // save the update user
         }
