@@ -4,6 +4,7 @@ import com.mgt.Model.User;
 import com.mgt.Repository.UserRepo;
 import com.mgt.Service.UserService;
 import com.mgt.dto.LoginRequest;
+import com.mgt.dto.ResetPassword;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,19 +38,32 @@ public class UserController {
 
     @PutMapping("/update")
     public String updatePro(@RequestBody User user){
-
         /*
         System.out.println("Name : " + user.getName());
         System.out.println("Phone No :" + user.getPhone_no());
         System.out.println("Email : " + user.getEmail());
         System.out.println("Password : " + user.getPassword());
         */
-
         boolean result = userService.updateProfile(user);
         if(result) {
             return "Profile update successfully";
         }else{
             return "Profile does not update";
         }
+    }
+
+    @PostMapping("/forgetPassword")
+    public String resetPass(@RequestBody ResetPassword resetPassword){
+
+        System.out.println("Email : " + resetPassword.getEmail());
+        System.out.println("Old Password : " + resetPassword.getOldPassword());
+        System.out.println("New Password : " + resetPassword.getNewPassword());
+
+        User user = userService.forgetPass(resetPassword.getEmail() , resetPassword.getOldPassword() , resetPassword.getNewPassword());
+
+        if(user != null){
+            return "Password updated successfully";
+        }
+        return "Invalid email or password";
     }
 }

@@ -9,4 +9,6 @@ public interface UserService {
     public User loginUser(String email , String password);
 
     public boolean updateProfile(User user);
+
+    User forgetPass(String email, String oldPassword, String newPassword);
 }

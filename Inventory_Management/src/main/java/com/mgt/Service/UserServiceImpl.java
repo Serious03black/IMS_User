@@ -50,4 +50,15 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public User forgetPass(String email, String oldPassword, String newPassword) {
+
+        User validUser = userRepo.findByEmail(email);
+        if(validUser != null && validUser.getPassword().matches(oldPassword)){
+            validUser.setPassword(newPassword);   // set new password to old password
+            return userRepo.save(validUser);      // save the update user
+        }
+        return null;   //  return null if email and password not found
+    }
+
 }
