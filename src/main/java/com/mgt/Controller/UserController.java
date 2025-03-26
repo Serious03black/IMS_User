@@ -1,9 +1,14 @@
 package com.mgt.Controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +24,11 @@ public class UserController {
 	@Autowired
 	private UserServiceImpl userService;
 
+	@GetMapping("message")
+	public String getMsg() {
+		return "Hi From Server";
+	}
+
 	@PostMapping("/register")
 	public ResponseEntity<User> registerUser(@RequestBody User user) {
 		User newUser = userService.addUser(user);
@@ -26,39 +36,19 @@ public class UserController {
 	}
 
 	@PostMapping("/login")
-	public String loginUser(@RequestBody User u) {
-		User user = null;
+	public ResponseEntity<Map<String, Object>> loginUser(@RequestBody User u) {
+		Map<String, Object> response = new HashMap<String, Object>();
 
-		// Check if username is provided and try login with username
-		if (u.getFull_name() != null && !u.getFull_name().isEmpty()) {
-			user = userService.loginUserName(u.getFull_name(), u.getPassword());
-		}
-		// If username not provided or login failed, try with email
-		if (user == null && u.getEmail() != null && !u.getEmail().isEmpty()) {
-			user = userService.loginUserEmail(u.getEmail(), u.getPassword());
-		}
+		// Validate user by email and password
+		User user = userService.loginUserEmail(u.getEmail(), u.getPassword());
 
 		if (user != null) {
-			return "Login Successfully";
+			response.put("message", "Login Successfully");
+			response.put("store_type", user.getStore_type()); // Fetch store type from DB
+			return ResponseEntity.ok(response);
 		} else {
-			return "Login Failed ... Please enter valid username/email and password";
+			response.put("message", "Invalid email or password");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
 		}
 	}
-
-
-//	@PostMapping("/forgetPassword")
-//	public String resetPass(@RequestBody ResetPassword resetPassword) {
-//
-//		System.out.println("Email : " + resetPassword.getEmail());
-//		System.out.println("Old Password : " + resetPassword.getNewPassword());
-//		System.out.println("New Password : " + resetPassword.getConfirmPassword());
-//
-//		User user = userService.forgetPass(resetPassword.getEmail(), resetPassword.getNewPassword(),
-//				resetPassword.getConfirmPassword());
-//
-//		if (user != null) {
-//			return "Password updated successfully";
-//		}
-//		return "Invalid email or password";
-//	}
 }
