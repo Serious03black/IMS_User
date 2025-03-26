@@ -1,0 +1,47 @@
+package com.mgt.Service;
+
+import com.mgt.Model.User;
+import com.mgt.Repository.UserRepo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+@Service
+public class UserServiceImpl  {
+
+	@Autowired
+	private UserRepo userRepo;
+
+	public User addUser(User user) {
+		return userRepo.save(user);
+	}
+
+	public User loginUserName(String email, String password) {
+		User validUser = userRepo.findByEmail(email);
+		if (validUser != null && validUser.getPassword().matches(password)) {
+			return validUser;
+		}
+		return null;
+	}
+	
+	public User loginUserEmail(String email, String password) {
+        User validUser = userRepo.findByEmail(email);
+        if (validUser != null && validUser.getPassword().matches(password)) {
+            return validUser;
+        }
+        return null;
+    }
+
+//	public User forgetPass(String email, String newPassword, String confirmPassword) {
+//
+//		User validUser = userRepo.findByEmail(email);
+//		if (validUser != null && Objects.equals(newPassword, confirmPassword)) {
+//			validUser.setPassword(newPassword); // set new password to old password
+//			return userRepo.save(validUser); // save the update user
+//		}
+//		return null; // return null if email and password not found
+//	}
+
+}
