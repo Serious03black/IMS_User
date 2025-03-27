@@ -1,7 +1,7 @@
-package com.mgt.Service;
+package com.mgt.service;
 
-import com.mgt.Model.Product;
-import com.mgt.Repository.ProductRepo;
+import com.mgt.model.Product;
+import com.mgt.repository.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

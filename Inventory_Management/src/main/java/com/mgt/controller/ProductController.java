@@ -1,7 +1,7 @@
-package com.mgt.Controller;
+package com.mgt.controller;
 
-import com.mgt.Model.Product;
-import com.mgt.Service.ProductService;
+import com.mgt.model.Product;
+import com.mgt.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

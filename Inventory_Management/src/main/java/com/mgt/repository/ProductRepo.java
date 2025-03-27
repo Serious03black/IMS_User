@@ -1,6 +1,6 @@
-package com.mgt.Repository;
+package com.mgt.repository;
 
-import com.mgt.Model.Product;
+import com.mgt.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

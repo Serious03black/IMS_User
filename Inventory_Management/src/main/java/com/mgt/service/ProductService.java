@@ -1,6 +1,6 @@
-package com.mgt.Service;
+package com.mgt.service;
 
-import com.mgt.Model.Product;
+import com.mgt.model.Product;
 
 import java.util.List;
 
