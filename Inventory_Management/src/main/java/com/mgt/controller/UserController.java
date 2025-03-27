@@ -18,11 +18,6 @@ public class UserController {
     @Autowired
     private UserServiceImpl userService;
 
-    @GetMapping("message")
-    public String getMsg() {
-        return "Hi From Server";
-    }
-
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         User newUser = userService.addUser(user);
