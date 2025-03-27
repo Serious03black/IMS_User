@@ -11,7 +11,7 @@ import java.util.Objects;
 public class UserServiceImpl  {
 
     @Autowired
-    private UserRepo userRepo; 
+    private UserRepo userRepo;
 
     public User addUser(User user) {
         return userRepo.save(user);
