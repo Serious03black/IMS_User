@@ -1,5 +1,6 @@
 package com.mgt.service;
 
+
 import com.mgt.model.User;
 import com.mgt.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
