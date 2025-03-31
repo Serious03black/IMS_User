@@ -1,7 +1,7 @@
 package com.mgt.controller;
 
 import com.mgt.model.Product;
-import com.mgt.service.ProductService;
+import com.mgt.service.ProductServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,13 +9,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ProductController {
 
     @Autowired
-    private ProductService productService;
+    private ProductServiceImpl productService;
 
     @PostMapping("/addProduct")
     public String addProduct(@RequestBody Product product) {
+
         boolean status = productService.addPro(product);
         if (status) {
             return "Product added successfully.";

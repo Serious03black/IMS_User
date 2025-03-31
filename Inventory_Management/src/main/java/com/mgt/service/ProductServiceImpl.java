@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl {
 
     @Autowired
     private ProductRepo productRepo;
 
-    @Override
+
     public boolean addPro(Product product) {
        boolean status = false;
 
@@ -26,12 +26,12 @@ public class ProductServiceImpl implements ProductService{
        return status;
     }
 
-    @Override
+
     public List<Product> getAllPro() {
         return productRepo.findAll();
     }
 
-    @Override
+
     public boolean updatePro(Product product) {
         boolean status = false;
 
@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService{
         return status;
     }
 
-    @Override
+
     public boolean deletePro(Integer product_id) {
         boolean status = false;
         if(product_id != null){
