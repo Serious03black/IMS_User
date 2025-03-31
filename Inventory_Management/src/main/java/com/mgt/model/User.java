@@ -20,10 +20,7 @@ public class User {
     @Column(name="name")
     private String full_name;
 
-    /*
-    @Column(name="phone_no")
-    private String phone_no;
-*/
+
     @Column(name="store_type")
     private String store_type;
 

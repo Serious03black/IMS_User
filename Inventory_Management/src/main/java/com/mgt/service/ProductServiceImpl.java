@@ -13,7 +13,6 @@ public class ProductServiceImpl {
     @Autowired
     private ProductRepo productRepo;
 
-
     public boolean addPro(Product product) {
        boolean status = false;
 

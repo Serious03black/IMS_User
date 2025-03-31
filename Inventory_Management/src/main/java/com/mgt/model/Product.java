@@ -31,5 +31,4 @@ public class Product {
 
     @Column(name="price")
     private Float product_price;
-
 }

@@ -13,7 +13,7 @@ import java.util.List;
 public class ProductController {
 
     @Autowired
-    private ProductServiceImpl productService;
+    private ProductServiceImpl  productService;
 
     @PostMapping("/addProduct")
     public String addProduct(@RequestBody Product product) {
