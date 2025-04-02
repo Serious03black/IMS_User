@@ -7,9 +7,9 @@ import jakarta.persistence.*;
 public class Product {
 
 	@Id
-	// @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "product_id")
-	private Integer product_id;
+	private int product_id;
 
 	@Column(name = "product_name")
 	private String product_name;
@@ -17,11 +17,24 @@ public class Product {
 	@Column(name = "product_price")
 	private Float product_price;
 
-	public Integer getProduct_id() {
+	@Column(name = "category")
+	private String product_category;
+
+	@Column(name = "stock_quantity")
+	private Integer product_available_stock_quantity;
+
+	@Column(name = "description")
+	private String product_description;
+
+	@Column(name = "product_image")
+	private String product_image; // Stores the image file path
+
+	// Getters and Setters
+	public int getProduct_id() {
 		return product_id;
 	}
 
-	public void setProduct_id(Integer product_id) {
+	public void setProduct_id(int product_id) {
 		this.product_id = product_id;
 	}
 
@@ -39,6 +52,38 @@ public class Product {
 
 	public void setProduct_price(Float product_price) {
 		this.product_price = product_price;
+	}
+
+	public String getProduct_image() {
+		return product_image;
+	}
+
+	public void setProduct_image(String product_image) {
+		this.product_image = product_image;
+	}
+
+	public String getProduct_category() {
+		return product_category;
+	}
+
+	public void setProduct_category(String product_category) {
+		this.product_category = product_category;
+	}
+
+	public Integer getProduct_available_stock_quantity() {
+		return product_available_stock_quantity;
+	}
+
+	public void setProduct_available_stock_quantity(Integer product_available_stock_quantity) {
+		this.product_available_stock_quantity = product_available_stock_quantity;
+	}
+
+	public String getProduct_description() {
+		return product_description;
+	}
+
+	public void setProduct_description(String product_description) {
+		this.product_description = product_description;
 	}
 
 }

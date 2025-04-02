@@ -1,54 +1,118 @@
 package com.mgt.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mgt.Model.Product;
 import com.mgt.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin("*")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+	@Autowired
+	private ProductService productService;
 
-    @PostMapping("/addProduct")
-    public String addProduct(@RequestBody Product product) {
-        boolean status = productService.addPro(product);
-        if (status) {
-            return "Product added successfully.";
-        } else {
-            return "Failed to add product. Please try again.";
-        }
-    }
+	@PostMapping(value = "/addProduct", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<Map<String, String>> addProduct(@RequestPart("product") String productJson,
+			@RequestPart("product_image") MultipartFile productImage) {
 
-    @GetMapping("/getProduct")
-    public List<Product> getProduct() {
+		System.out.println("Received JSON: " + productJson); // Debugging Line
 
-        return productService.getAllPro();
-    }
+		ObjectMapper objectMapper = new ObjectMapper();
+		Product product;
+		try {
+			product = objectMapper.readValue(productJson, Product.class);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Collections.singletonMap("message", "Invalid product JSON format"));
+		}
 
-    @PutMapping("/updateProduct")
-    public String updateProduct(@RequestBody Product product) {
-        boolean status = productService.updatePro(product);
-        if (status) {
-            return "Product Update Successfully";
-        } else {
-            return "Failed to update product. Please try again.";
-        }
-    }
+		// Process product & image
+		boolean status = productService.addPro(product, productImage);
 
-    @DeleteMapping("/deleteProduct/{product_id}")
-    public String deleteProduct(@PathVariable Integer product_id) {
+		Map<String, String> response = new HashMap<String, String>();
+		response.put("message", status ? "Product added successfully." : "Failed to add product.");
+		return ResponseEntity.status(status ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST).body(response);
+	}
 
-        boolean status = productService.deletePro(product_id);
+	@GetMapping("/getProduct/{product_id}")
+	public ResponseEntity<Product> getProductById(@PathVariable("product_id") int id) {
+		Product product = productService.getProductById(id);
+		if (product != null) {
+			return ResponseEntity.ok(product);
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
+	}
 
-        if (status) {
-            return "Product Deleted Successfully !!";
-        } else {
-            return "Failed to delete product. Please try again.";
-        }
-    }
+	private static final String UPLOAD_DIR = "D:/MGT/uploads/";
+
+	@GetMapping("/getImageByProductId/{product_id}")
+	public ResponseEntity<Resource> getImageByProductId(@PathVariable("product_id") int productId) throws IOException {
+		// Fetch the product from the database
+		Product product = productService.getProductById(productId);
+
+		if (product == null || product.getProduct_image() == null || product.getProduct_image().isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
+
+		// Ensure the stored image path is only a filename, not a full path
+		String imageName = Paths.get(product.getProduct_image()).getFileName().toString();
+
+		// Construct the correct absolute path
+		Path imagePath = Paths.get(UPLOAD_DIR, imageName).normalize(); // Normalize to fix path issues
+
+		// Check if file exists
+		Resource resource = new UrlResource(imagePath.toUri());
+		if (resource.exists() && resource.isReadable()) {
+			return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG) // Change dynamically if needed
+					.body(resource);
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+	}
+
+	@GetMapping("/getProduct")
+	public List<Product> getProduct() {
+		return productService.getAllPro();
+	}
+
+	@PutMapping("/updateProduct")
+	public ResponseEntity<String> updateProduct(@RequestBody Product product) {
+		boolean status = productService.updatePro(product);
+		if (status) {
+			return ResponseEntity.ok("Product updated successfully.");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update product. Please try again.");
+		}
+	}
+
+	@DeleteMapping("/deleteProduct/{product_id}")
+	public ResponseEntity<String> deleteProduct(@PathVariable("product_id") Integer product_id) {
+		boolean status = productService.deletePro(product_id);
+		if (status) {
+			return ResponseEntity.ok("Product deleted successfully.");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete product. Please try again.");
+		}
+	}
 }

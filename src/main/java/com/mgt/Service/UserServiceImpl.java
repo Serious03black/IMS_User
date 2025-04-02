@@ -1,12 +1,10 @@
 package com.mgt.Service;
 
-import com.mgt.Model.User;
-import com.mgt.Repository.UserRepo;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import com.mgt.Model.User;
+import com.mgt.Repository.UserRepo;
 
 @Service
 public class UserServiceImpl {
