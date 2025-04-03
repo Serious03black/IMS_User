@@ -20,12 +20,8 @@ public class User {
     @Column(name="name")
     private String full_name;
 
-
     @Column(name="store_type")
     private String store_type;
-
-    @Column(name="user_role")
-    private String user_role;
 
     @Column(name="email")
     private String email;

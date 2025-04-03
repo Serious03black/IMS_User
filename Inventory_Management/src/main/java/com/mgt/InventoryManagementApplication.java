@@ -12,5 +12,4 @@ public class InventoryManagementApplication {
 
 		System.out.println("Application Started...");
 	}
-
 }

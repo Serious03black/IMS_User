@@ -15,29 +15,34 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
-
     @Autowired
     private UserServiceImpl userService;
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
+        System.out.println(user.getFull_name());
         User newUser = userService.addUser(user);
         return ResponseEntity.ok(newUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody User u) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody User user) {
         Map<String, Object> response = new HashMap<String, Object>();
 
-        // Validate user by email and password
-        User user = userService.loginUserEmail(u.getEmail(), u.getPassword());
+        //System.out.println(user.getEmail());
+       // System.out.println(user.getPassword());
 
-        if (user != null) {
+        // Validate user by email and password
+        User loginUser = userService.loginUserEmail(user.getEmail(), user.getPassword());
+
+        if (loginUser != null) {
             response.put("message", "Login Successfully");
-            response.put("store_type", user.getStore_type()); // Fetch store type from DB
+           // response.put("store_type", user.getStore_type()); // Fetch store type from DB
+            System.out.println("Login Successfully");
             return ResponseEntity.ok(response);
         } else {
             response.put("message", "Invalid email or password");
+            System.out.println("Invalid Email and Password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }

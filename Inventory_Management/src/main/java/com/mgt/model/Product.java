@@ -30,5 +30,9 @@ public class Product {
     private String product_description;
 
     @Column(name="price")
-    private Float product_price;
+    private Double product_price;
+
+    @Column(name = "image")
+    private String product_image; // Stores the image file path
+
 }
