@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -59,19 +60,35 @@ public class ProductServiceImpl implements ProductService {
 		return productRepo.findAll();
 	}
 
-	public boolean updatePro(Product product) {
-		boolean status = false;
+	public Product updatePro(Product product, MultipartFile image) {
+	    Optional<Product> optionalProduct = productRepo.findById(product.getProduct_id());
 
-		try {
-			productRepo.save(product);
-			status = true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			status = false;
-		}
+	    if (optionalProduct.isPresent()) {
+	        Product existingProduct = optionalProduct.get();
 
-		return status;
+	        // Update fields
+	        existingProduct.setProduct_name(product.getProduct_name());
+	        existingProduct.setProduct_price(product.getProduct_price());
+	        existingProduct.setProduct_category(product.getProduct_category());
+	        existingProduct.setProduct_available_stock_quantity(product.getProduct_available_stock_quantity());
+	        existingProduct.setProduct_description(product.getProduct_description());
+
+	        // Update image if a new one is provided
+	        if (image != null && !image.isEmpty()) {
+	            try {
+	                String imagePath = storeImage(image);
+	                existingProduct.setProduct_image(imagePath);
+	            } catch (IOException e) {
+	                throw new RuntimeException("Failed to save image", e);
+	            }
+	        }
+
+	        return productRepo.save(existingProduct);
+	    } else {
+	        throw new RuntimeException("Product not found with id: " + product.getProduct_id());
+	    }
 	}
+
 
 	public boolean deletePro(Integer product_id) {
 		boolean status = false;

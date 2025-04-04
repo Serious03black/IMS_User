@@ -40,7 +40,7 @@ public class UserController {
 		Map<String, Object> response = new HashMap<String, Object>();
 
 		System.out.println(u.getEmail());
-		System.out.println(u.getPassword());
+		System.out.println(u.getPassword()); 
 		// Validate user by email and password
 		User user = userService.loginUserEmail(u.getEmail(), u.getPassword());
 

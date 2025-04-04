@@ -6,14 +6,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface ProductService {
-	boolean addPro(Product product, MultipartFile imageFile);
+	public boolean addPro(Product product, MultipartFile imageFile);
 
-	List<Product> getAllPro();
+	public List<Product> getAllPro();
 
-	boolean updatePro(Product product);
+	public Product updatePro(Product product, MultipartFile image);
 
-	boolean deletePro(Integer product_id);
+	public boolean deletePro(Integer product_id);
 
-	Product getProductById(int id);
-	
+	public Product getProductById(int id);
+
 }

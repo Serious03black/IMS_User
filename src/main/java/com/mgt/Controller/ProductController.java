@@ -96,14 +96,19 @@ public class ProductController {
 		return productService.getAllPro();
 	}
 
-	@PutMapping("/updateProduct")
-	public ResponseEntity<String> updateProduct(@RequestBody Product product) {
-		boolean status = productService.updatePro(product);
-		if (status) {
-			return ResponseEntity.ok("Product updated successfully.");
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update product. Please try again.");
+	@PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<Product> updateProduct(@RequestPart("product") String productJson,
+			@RequestPart(value = "product_image", required = false) MultipartFile image) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Product product;
+		try {
+			product = objectMapper.readValue(productJson, Product.class);
+		} catch (JsonProcessingException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 		}
+
+		Product updatedProduct = productService.updatePro(product, image);
+		return ResponseEntity.ok(updatedProduct);
 	}
 
 	@DeleteMapping("/deleteProduct/{product_id}")
