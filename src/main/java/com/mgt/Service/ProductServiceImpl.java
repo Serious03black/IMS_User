@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -24,6 +25,11 @@ public class ProductServiceImpl implements ProductService {
 
 	public boolean addPro(Product product, MultipartFile productImage) {
 		try {
+			// Generate barcode if not already present
+			if (product.getProduct_barcode() == null || product.getProduct_barcode().isEmpty()) {
+				product.setProduct_barcode("BAR-" + generateAlphanumericCode(8));
+			}
+
 			// Store the image and get file path
 			String filePath = storeImage(productImage);
 
@@ -33,6 +39,7 @@ public class ProductServiceImpl implements ProductService {
 			// Save product to database
 			productRepo.save(product);
 
+			System.out.println("Product saved successfully.");
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -41,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private String storeImage(MultipartFile file) throws IOException {
-		String directory = "D:/MGT/uploads/"; // Change this path as needed
+		String directory = "D:/MGT/uploads/";
 		File dir = new File(directory);
 		if (!dir.exists()) {
 			dir.mkdirs(); // Create directory if not exists
@@ -56,39 +63,48 @@ public class ProductServiceImpl implements ProductService {
 		return filePath;
 	}
 
+	private String generateAlphanumericCode(int length) {
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < length; i++) {
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		return sb.toString();
+	}
+
 	public List<Product> getAllPro() {
 		return productRepo.findAll();
 	}
 
 	public Product updatePro(Product product, MultipartFile image) {
-	    Optional<Product> optionalProduct = productRepo.findById(product.getProduct_id());
+		Optional<Product> optionalProduct = productRepo.findById(product.getProduct_id());
 
-	    if (optionalProduct.isPresent()) {
-	        Product existingProduct = optionalProduct.get();
+		if (optionalProduct.isPresent()) {
+			Product existingProduct = optionalProduct.get();
 
-	        // Update fields
-	        existingProduct.setProduct_name(product.getProduct_name());
-	        existingProduct.setProduct_price(product.getProduct_price());
-	        existingProduct.setProduct_category(product.getProduct_category());
-	        existingProduct.setProduct_available_stock_quantity(product.getProduct_available_stock_quantity());
-	        existingProduct.setProduct_description(product.getProduct_description());
+			// Update fields
+			existingProduct.setProduct_name(product.getProduct_name());
+			existingProduct.setProduct_price(product.getProduct_price());
+			existingProduct.setProduct_category(product.getProduct_category());
+			existingProduct.setProduct_available_stock_quantity(product.getProduct_available_stock_quantity());
+			existingProduct.setProduct_description(product.getProduct_description());
 
-	        // Update image if a new one is provided
-	        if (image != null && !image.isEmpty()) {
-	            try {
-	                String imagePath = storeImage(image);
-	                existingProduct.setProduct_image(imagePath);
-	            } catch (IOException e) {
-	                throw new RuntimeException("Failed to save image", e);
-	            }
-	        }
+			// Update image if a new one is provided
+			if (image != null && !image.isEmpty()) {
+				try {
+					String imagePath = storeImage(image);
+					existingProduct.setProduct_image(imagePath);
+				} catch (IOException e) {
+					throw new RuntimeException("Failed to save image", e);
+				}
+			}
 
-	        return productRepo.save(existingProduct);
-	    } else {
-	        throw new RuntimeException("Product not found with id: " + product.getProduct_id());
-	    }
+			return productRepo.save(existingProduct);
+		} else {
+			throw new RuntimeException("Product not found with id: " + product.getProduct_id());
+		}
 	}
-
 
 	public boolean deletePro(Integer product_id) {
 		boolean status = false;

@@ -1,6 +1,7 @@
 package com.mgt.Model;
 
 import jakarta.persistence.*;
+import java.util.Random;
 
 @Entity
 @Table(name = "product")
@@ -27,9 +28,30 @@ public class Product {
 	private String product_description;
 
 	@Column(name = "product_image")
-	private String product_image; // Stores the image file path
+	private String product_image;
+
+	@Column(name = "product_barcode", unique = true)
+	private String product_barcode;
+
+	@PrePersist
+	public void generateBarcode() {
+		if (this.product_barcode == null || this.product_barcode.isEmpty()) {
+			this.product_barcode = "BAR-" + generateAlphanumericCode(8);
+		}
+	}
+
+	private String generateAlphanumericCode(int length) {
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < length; i++) {
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		return sb.toString();
+	}
 
 	// Getters and Setters
+
 	public int getProduct_id() {
 		return product_id;
 	}
@@ -86,4 +108,11 @@ public class Product {
 		this.product_description = product_description;
 	}
 
+	public String getProduct_barcode() {
+		return product_barcode;
+	}
+
+	public void setProduct_barcode(String product_barcode) {
+		this.product_barcode = product_barcode;
+	}
 }

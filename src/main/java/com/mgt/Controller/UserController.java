@@ -37,22 +37,23 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<Map<String, Object>> loginUser(@RequestBody User u) {
-		Map<String, Object> response = new HashMap<String, Object>();
+	    Map<String, Object> response = new HashMap<String, Object>();
 
-		System.out.println(u.getEmail());
-		System.out.println(u.getPassword()); 
-		// Validate user by email and password
-		User user = userService.loginUserEmail(u.getEmail(), u.getPassword());
+	    System.out.println(u.getEmail());
+	    System.out.println(u.getPassword()); 
 
-		if (user != null) {
-			response.put("message", "Login Successfully");
-//			response.put("store_type", user.getStore_type()); // Fetch store type from DB
-			System.out.println("Login Successfully");
-			return ResponseEntity.ok(response);
-		} else {
-			response.put("message", "Invalid email or password");
-			System.out.println("Invalid email or password");
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-		}
+	    // Validate user by email and password
+	    User user = userService.loginUserEmail(u.getEmail(), u.getPassword());
+
+	    if (user != null) {
+	        response.put("message", "Login Successfully");
+	        response.put("store_type", user.getStore_type()); // Include store_type in response
+	        System.out.println("Login Successfully with store_type: " + user.getStore_type());
+	        return ResponseEntity.ok(response);
+	    } else {
+	        response.put("message", "Invalid email or password");
+	        System.out.println("Invalid email or password");
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+	    }
 	}
 }
