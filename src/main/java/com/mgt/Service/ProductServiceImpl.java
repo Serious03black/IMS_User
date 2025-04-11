@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private String storeImage(MultipartFile file) throws IOException {
-		String directory = "D:/MGT/uploads/";
+		String directory = "C:/MGT/uploads/";
 		File dir = new File(directory);
 		if (!dir.exists()) {
 			dir.mkdirs(); // Create directory if not exists
