@@ -1,10 +1,4 @@
-package com.mgt.Service;
-
-import com.mgt.Model.Product;
-import com.mgt.Repository.ProductRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+package com.mgt.serviceimpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +7,15 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.mgt.model.Product;
+import com.mgt.repository.ProductRepo;
+
 @Service
-public class ProductServiceImpl implements ProductService {
+public class ProductServiceImpl  {
 
 	@Autowired
 	private ProductRepo productRepo;

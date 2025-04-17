@@ -1,4 +1,4 @@
-package com.mgt.Controller;
+package com.mgt.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mgt.Model.User;
-import com.mgt.Service.UserServiceImpl;
+import com.mgt.model.Status;
+import com.mgt.model.User;
+import com.mgt.serviceimpl.UserServiceImpl;
 
 @RestController
 @RequestMapping("/api")
@@ -31,6 +32,9 @@ public class UserController {
 
 	@PostMapping("/register")
 	public ResponseEntity<User> registerUser(@RequestBody User user) {
+		if (user.getStatus() == null) {
+	        user.setStatus(Status.PENDING);  // force set if null
+	    } 
 		User newUser = userService.addUser(user);
 		return ResponseEntity.ok(newUser);
 	}

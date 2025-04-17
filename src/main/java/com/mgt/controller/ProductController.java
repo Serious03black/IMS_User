@@ -1,4 +1,4 @@
-package com.mgt.Controller;
+package com.mgt.controller;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -27,8 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mgt.Model.Product;
-import com.mgt.Service.ProductService;
+import com.mgt.model.Product;
+import com.mgt.serviceimpl.ProductServiceImpl;
 
 @RestController
 @RequestMapping("/api")
@@ -36,7 +36,7 @@ import com.mgt.Service.ProductService;
 public class ProductController {
 
 	@Autowired
-	private ProductService productService;
+	private ProductServiceImpl productService;
 
 	@PostMapping(value = "/addProduct", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Map<String, String>> addProduct(@RequestPart("product") String productJson,
