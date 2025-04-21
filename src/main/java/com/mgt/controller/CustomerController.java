@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*") // allow Angular frontend
+@CrossOrigin(origins = "http://localhost:4200") // allow Angular frontend
 public class CustomerController {
 
     @Autowired
