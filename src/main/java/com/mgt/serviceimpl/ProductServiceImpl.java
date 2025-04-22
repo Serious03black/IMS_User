@@ -90,6 +90,8 @@ public class ProductServiceImpl  {
 			existingProduct.setProduct_category(product.getProduct_category());
 			existingProduct.setProduct_available_stock_quantity(product.getProduct_available_stock_quantity());
 			existingProduct.setProduct_description(product.getProduct_description());
+			existingProduct.setGst_rate(product.getGst_rate());
+			existingProduct.setGst_type(product.getGst_type());
 
 			// Update image if a new one is provided
 			if (image != null && !image.isEmpty()) {
