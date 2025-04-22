@@ -27,6 +27,12 @@ public class Product {
 	@Column(name = "description")
 	private String product_description;
 
+	@Column(name="gst_type")
+	private String gst_type;
+
+	@Column(name="gst_rate")
+	private Float gst_rate;
+
 	@Column(name = "product_image")
 	private String product_image;
 
@@ -106,6 +112,22 @@ public class Product {
 
 	public void setProduct_description(String product_description) {
 		this.product_description = product_description;
+	}
+
+	public String getGst_type() {
+		return gst_type;
+	}
+
+	public void setGst_type(String gst_type) {
+		this.gst_type = gst_type;
+	}
+
+	public Float getGst_rate() {
+		return gst_rate;
+	}
+
+	public void setGst_rate(Float gst_rate) {
+		this.gst_rate = gst_rate;
 	}
 
 	public String getProduct_barcode() {
