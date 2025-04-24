@@ -30,9 +30,11 @@ public class AdminController {
 	// View All Users
 	@GetMapping("/users")
 	public List<User> getAllUser() {
-		return userServiceImpl.getAllUser();
+
+        return userServiceImpl.getAllUser();
 	}
-  @PutMapping("/approve/{id}")
+
+    @PutMapping("/approve/{id}")
     public ResponseEntity<Map<String, Object>> approveUser(@PathVariable("id") Integer id) {
         User user = userServiceImpl.findById(id);
         if (user == null) {

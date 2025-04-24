@@ -1,5 +1,6 @@
 package com.mgt.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -26,6 +27,11 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<CustomerProduct> customerProductList;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonBackReference
+    private User user;
 
     public int getCustomerId() {
         return customerId;
@@ -65,5 +71,13 @@ public class Customer {
 
     public void setCustomerProductList(List<CustomerProduct> customerProductList) {
         this.customerProductList = customerProductList;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

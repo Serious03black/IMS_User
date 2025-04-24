@@ -41,6 +41,8 @@ public class CustomerProduct {
     @JsonBackReference
     private Customer customer;
 
+
+
     public int getProductId() {
         return productId;
     }
@@ -120,4 +122,6 @@ public class CustomerProduct {
     public void setCustomer(Customer customer) {
         this.customer = customer;
     }
+
+
 }

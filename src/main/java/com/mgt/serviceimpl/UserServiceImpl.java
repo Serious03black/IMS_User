@@ -3,6 +3,7 @@ package com.mgt.serviceimpl;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +16,8 @@ public class UserServiceImpl {
 	private UserRepo userRepo;
 
 	public User addUser(User user) {
-		return userRepo.save(user);
-	}
 
-	public User loginUserName(String email, String password) {
-		User validUser = userRepo.findByEmail(email);
-		if (validUser != null && validUser.getPassword().matches(password)) {
-			return validUser;
-		}
-		return null;
+		return userRepo.save(user);
 	}
 
 	public User loginUserEmail(String email, String password) {
@@ -59,6 +53,9 @@ public class UserServiceImpl {
 
 
 	public List<User> getAllUser() {
+
 		return userRepo.findAll();
 	}
+
+
 }

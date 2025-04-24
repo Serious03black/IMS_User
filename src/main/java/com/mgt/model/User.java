@@ -1,14 +1,8 @@
 package com.mgt.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -16,7 +10,7 @@ public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
+	@Column(name = "user_id")
 	private Integer id;
 
 	@Column(name = "name")
@@ -30,6 +24,9 @@ public class User {
 
 	@Column(name = "password")
 	private String password;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<Product> products;
 
 	@Enumerated(EnumType.STRING)
 	private Status status = Status.PENDING;
@@ -95,5 +92,13 @@ public class User {
 
 	public User() {
 		this.status = Status.PENDING;
+	}
+
+	public List<Product> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<Product> products) {
+		this.products = products;
 	}
 }

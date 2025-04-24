@@ -9,7 +9,7 @@ public class Product {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "product_id")
+	@Column(name = "product_list_id")
 	private int product_id;
 
 	@Column(name = "product_name")
@@ -38,6 +38,10 @@ public class Product {
 
 	@Column(name = "product_barcode", unique = true)
 	private String product_barcode;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	@PrePersist
 	public void generateBarcode() {
@@ -136,5 +140,13 @@ public class Product {
 
 	public void setProduct_barcode(String product_barcode) {
 		this.product_barcode = product_barcode;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 }
