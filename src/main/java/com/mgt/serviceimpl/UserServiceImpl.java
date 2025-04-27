@@ -2,13 +2,11 @@ package com.mgt.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.mgt.model.User;
 import com.mgt.repository.UserRepo;
+
 @Service
 public class UserServiceImpl {
 
@@ -20,13 +18,13 @@ public class UserServiceImpl {
 		return userRepo.save(user);
 	}
 
-	public User loginUserEmail(String email, String password) {
+/* 	public User loginUserEmail(String email, String password) {
 		User validUser = userRepo.findByEmail(email);
 		if (validUser != null && validUser.getPassword().matches(password)) {
 			return validUser;
 		}
 		return null;
-	}
+	} */
 
 	public boolean deleteUser(Integer id) {
 
@@ -39,7 +37,7 @@ public class UserServiceImpl {
 	}
 
 	public User updatUser(User user) {
-		Optional<User> existingUser = userRepo.findById(user.getId());
+		Optional<User> existingUser = UserRepo.findById(user.getId());
 		if(existingUser.isPresent()){
 			return userRepo.save(user);
 		}else{

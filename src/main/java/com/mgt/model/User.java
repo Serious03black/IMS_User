@@ -11,7 +11,7 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")
-	private Integer id;
+	private Long id;
 
 	@Column(name = "name")
 	private String full_name;
@@ -34,11 +34,11 @@ public class User {
 	@Transient
 	private String confirm_password;
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -101,4 +101,30 @@ public class User {
 	public void setProducts(List<Product> products) {
 		this.products = products;
 	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", full_name=" + full_name + ", store_type=" + store_type + ", email=" + email
+				+ ", password=" + password + ", products=" + products + ", status=" + status + ", confirm_password="
+				+ confirm_password + ", getId()=" + getId() + ", getFull_name()=" + getFull_name()
+				+ ", getStore_type()=" + getStore_type() + ", getEmail()=" + getEmail() + ", getPassword()="
+				+ getPassword() + ", getConfirm_password()=" + getConfirm_password() + ", getClass()=" + getClass()
+				+ ", getStatus()=" + getStatus() + ", getProducts()=" + getProducts() + ", hashCode()=" + hashCode()
+				+ ", toString()=" + super.toString() + "]";
+	}
+
+	public User(Long id, String full_name, String store_type, String email, String password, List<Product> products,
+			Status status, String confirm_password) {
+		this.id = id;
+		this.full_name = full_name;
+		this.store_type = store_type;
+		this.email = email;
+		this.password = password;
+		this.products = products;
+		this.status = status;
+		this.confirm_password = confirm_password;
+	}
+
+	
+	
 }

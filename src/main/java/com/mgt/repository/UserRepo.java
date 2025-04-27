@@ -8,10 +8,19 @@ import org.springframework.stereotype.Repository;
 import com.mgt.model.User;
 
 
+
 @Repository
 public interface UserRepo extends JpaRepository<User, Integer> {
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
     
-    Optional<User> findById(Long id);
+    static Optional<User> findById(Long id) {
+      
+        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    }
+
+
+
+   
+    
 }
