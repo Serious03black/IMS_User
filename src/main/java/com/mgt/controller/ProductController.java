@@ -8,21 +8,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mgt.jwtServices.JwtService;
+import com.mgt.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,12 +32,33 @@ public class ProductController {
 	@Autowired
 	private ProductServiceImpl productService;
 
+	@Autowired
+	private JwtService jwtService;
+
 	@PostMapping(value = "/addProduct", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Map<String, String>> addProduct(@RequestPart("product") String productJson,
-														  @RequestPart("product_image") MultipartFile productImage) {
+														  @RequestPart("product_image") MultipartFile productImage,
+														  @RequestHeader("Authorization") String authHeader) {
+		// Check if Authorization header exists
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(Collections.singletonMap("message", "Authorization header is missing or incorrect"));
+		}
 
-		System.out.println("Received JSON: " + productJson); // Debugging Line
+		// Extract token from Authorization header
+		String token = authHeader.substring(7); // Remove "Bearer " prefix
+		Long userId = null;
+		try {
+			userId = jwtService.extractUserId(token); // Extract userId from token
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(Collections.singletonMap("message", "Invalid token"));
+		}
 
+		System.out.println("User ID extracted from token: " + userId); // Debugging line
+
+		// Deserialize product JSON to Product object
 		ObjectMapper objectMapper = new ObjectMapper();
 		Product product;
 		try {
@@ -54,13 +69,30 @@ public class ProductController {
 					.body(Collections.singletonMap("message", "Invalid product JSON format"));
 		}
 
+		// Log product details for debugging
+		System.out.println("Product received: " + product);
+
+		// Create a User object and set its ID
+		User user = new User();
+		user.setId(userId); // Set userId from the token
+
+		// Associate the user with the product
+		product.setUser(user); // Set the user for this product
+
+		// Ensure productImage is not null
+		if (productImage.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Collections.singletonMap("message", "Product image is missing"));
+		}
+
 		// Process product & image
 		boolean status = productService.addPro(product, productImage);
 
-		Map<String, String> response = new HashMap<String, String>();
+		Map<String, String> response = new HashMap<>();
 		response.put("message", status ? "Product added successfully." : "Failed to add product.");
 		return ResponseEntity.status(status ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST).body(response);
 	}
+
 
 	@GetMapping("/getProduct/{product_id}")
 	public ResponseEntity<Product> getProductById(@PathVariable("product_id") int id) {
