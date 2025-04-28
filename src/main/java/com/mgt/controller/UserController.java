@@ -11,6 +11,9 @@ import com.mgt.jwtServices.JwtService;
 import com.mgt.model.AuthRequest;
 import com.mgt.model.User;
 import com.mgt.model.UserInfoService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api")
@@ -62,4 +65,10 @@ public class UserController {
 	public String adminProfile() {
 		return "Welcome to the ADMIN profile!";
 	}
+
+	@GetMapping("/testLanding")
+	public String testLanding() {
+		return "Test landing";
+	}
+	
 }
