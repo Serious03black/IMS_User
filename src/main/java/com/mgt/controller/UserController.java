@@ -11,8 +11,7 @@ import com.mgt.jwtServices.JwtService;
 import com.mgt.model.AuthRequest;
 import com.mgt.model.User;
 import com.mgt.model.UserInfoService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -66,9 +65,11 @@ public class UserController {
 		return "Welcome to the ADMIN profile!";
 	}
 
-	@GetMapping("/testLanding")
-	public String testLanding() {
-		return "Test landing";
-	}
+	 @GetMapping("/testLanding")
+    public String afterLogin(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtService.extractUserId(token);
+        return "Welcome to login user " + userId;
+    }
 	
 }
