@@ -5,8 +5,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +23,7 @@ public class JwtService {
 
     private final UserRepo userRepo;
 
-    @Autowired
+  
     public JwtService(UserRepo userRepo) {
         this.userRepo = userRepo;
     }

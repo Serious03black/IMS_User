@@ -10,17 +10,12 @@ import com.mgt.model.User;
 
 
 @Repository
-public interface UserRepo extends JpaRepository<User, Integer> {
+public interface UserRepo extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
-    
-    static Optional<User> findById(Long id) {
-      
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
-    }
 
+    @SuppressWarnings("null")
+    Optional<User> findById(Long categoryId);
 
-
-   
     
 }
