@@ -43,7 +43,7 @@ public class SecurityConfig {
             // Configure endpoint authorization
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
-                .requestMatchers("api/welcome","api/register", "api/login").permitAll()
+                .requestMatchers("api/welcome","api/register", "api/login","api/addProduct","api/showProduct","api/getImage/{productId}").permitAll()
                 
                 // Role-based endpoints
                 .requestMatchers("api/auth/user/userProfile").hasAnyAuthority("electronics","stationary")

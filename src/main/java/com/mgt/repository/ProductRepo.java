@@ -7,9 +7,12 @@ import com.mgt.model.Product;
 import java.util.List;
 
 
+
 @Repository
 public interface ProductRepo extends JpaRepository<Product, Integer> {
 
     List<Product> findByUserId(Long userId);
+
+
 
 }

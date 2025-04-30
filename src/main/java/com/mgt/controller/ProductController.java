@@ -1,6 +1,5 @@
 package com.mgt.controller;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -81,7 +80,6 @@ public class ProductController {
 			Path filepath = Paths.get(uploadDir, filename);
 			Files.copy(imageFile.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
 
-			// ✅ Create Product Entity
 			Product product = new Product();
 			product.setProduct_name(name);
 			product.setProduct_price(price);
@@ -93,7 +91,7 @@ public class ProductController {
 			product.setProduct_image(filepath.toString());
 			product.setUser(user); // associate user
 
-			// ✅ Save Product
+			
 			Product savedProduct = productRepo.save(product);
 
 			return ResponseEntity.ok(savedProduct);
@@ -105,7 +103,7 @@ public class ProductController {
 		}
 	}
 
-	@GetMapping("/products/byUser")
+	@GetMapping("/showProduct")
 	public ResponseEntity<?> getProductsByUser(
 			@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 		try {
@@ -115,7 +113,7 @@ public class ProductController {
 						.body("Missing or invalid Authorization header");
 			}
 
-			// ✅ Extract User ID from JWT
+			
 			String token = authorizationHeader.substring(7);
 			Long userId = jwtService.extractUserId(token);
 
@@ -123,7 +121,7 @@ public class ProductController {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
 			}
 
-			// ✅ Fetch Products by User ID
+			
 			List<Product> products = productRepo.findByUserId(userId);
 
 			return ResponseEntity.ok(products);
@@ -133,6 +131,42 @@ public class ProductController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Error fetching products for user: " + e.getMessage());
 		}
+
+		
 	}
+
+	@GetMapping("/getImage/{productId}")
+public ResponseEntity<?> getProductImage(@PathVariable int productId) {
+    try {
+        // ✅ Fetch the product safely using Optional
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // ✅ Get image path from product
+        String imagePath = product.getProduct_image();
+        Path imageFilePath = Paths.get(imagePath);
+
+        if (!Files.exists(imageFilePath)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
+        }
+
+        // ✅ Read image as byte array
+        byte[] imageBytes = Files.readAllBytes(imageFilePath);
+
+        // ✅ Detect content type
+        String contentType = Files.probeContentType(imageFilePath);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(imageBytes);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error fetching image: " + e.getMessage());
+    }
+}
+
+	
 
 }
