@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "user")
 public class User {
@@ -19,13 +21,14 @@ public class User {
 	@Column(name = "store_type")
 	private String store_type;
 
-	@Column(name = "email")
+	@Column(name = "email" )
 	private String email;
 
 	@Column(name = "password")
 	private String password;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<Product> products;
 
 	@Enumerated(EnumType.STRING)

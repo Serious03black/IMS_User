@@ -34,7 +34,7 @@ public class AdminController {
 	}
 
     @PutMapping("/approve/{id}")
-    public ResponseEntity<Map<String, Object>> approveUser(@PathVariable("id") Integer id) {
+    public ResponseEntity<Map<String, Object>> approveUser(@PathVariable("id") Long id) {
         User user = userServiceImpl.findById(id);
         if (user == null) {
             Map<String, Object> response = new HashMap<>();
@@ -52,7 +52,7 @@ public class AdminController {
 
     // Admin reject endpoint
     @PutMapping("/reject/{id}")
-    public ResponseEntity<Map<String, Object>> rejectUser(@PathVariable("id") Integer id) {
+    public ResponseEntity<Map<String, Object>> rejectUser(@PathVariable("id") Long id) {
         User user = userServiceImpl.findById(id);
         if (user == null) {
             Map<String, Object> response = new HashMap<>();

@@ -26,7 +26,7 @@ public class UserServiceImpl {
 		return null;
 	} */
 
-	public boolean deleteUser(Integer id) {
+	public boolean deleteUser(Long id) {
 
 		boolean status = false;
 		if (id != null) {
@@ -35,16 +35,16 @@ public class UserServiceImpl {
 		}
 		return status;
 	}
-
-	public User updatUser(User user) {
-		Optional<User> existingUser = UserRepo.findById(user.getId());
-		if(existingUser.isPresent()){
-			return userRepo.save(user);
-		}else{
-			return null;
-		}
-	}
-	public User findById(Integer id) {
+//
+//	public User updatUser(User user) {
+//		Optional<User> existingUser = UserRepo.findById(user.getId());
+//		if(existingUser.isPresent()){
+//			return userRepo.save(user);
+//		}else{
+//			return null;
+//		}
+//	}
+	public User findById(Long id) {
     Optional<User> user = userRepo.findById(id);
     return user.orElse(null);
 }

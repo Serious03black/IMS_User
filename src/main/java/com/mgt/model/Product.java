@@ -3,6 +3,8 @@ package com.mgt.model;
 import jakarta.persistence.*;
 import java.util.Random;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "product")
 public class Product {
@@ -41,6 +43,7 @@ public class Product {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
+	@JsonBackReference
 	private User user;
 
 	@PrePersist

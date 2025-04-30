@@ -46,8 +46,8 @@ public class SecurityConfig {
                 .requestMatchers("api/welcome","api/register", "api/login").permitAll()
                 
                 // Role-based endpoints
-                .requestMatchers("api/auth/user/userProfile").hasAnyAuthority("electronics","staionary")
-                .requestMatchers("/auth/admin/adminProfile").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("api/auth/user/userProfile").hasAnyAuthority("electronics","stationary")
+                .requestMatchers("/auth/admin/adminProfile").hasAuthority("ROLE_ADMIN").requestMatchers("/api/addProduct").authenticated()
                 
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
