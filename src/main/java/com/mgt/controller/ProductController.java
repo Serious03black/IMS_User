@@ -21,22 +21,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.mgt.model.Product;
 
-
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:4200")
 public class ProductController {
 
-    @Autowired
-    private UserRepo userRepo;
+	@Autowired
+	private UserRepo userRepo;
 
-    @Autowired
-    private ProductRepo productRepo;
+	@Autowired
+	private ProductRepo productRepo;
 
-    @Autowired
-    private JwtService jwtService;
+	@Autowired
+	private JwtService jwtService;
 
-    private final String uploadDir = "uploads/products/";
+	private final String uploadDir = "uploads/products/";
 
 	@PostMapping(value = "/addProduct", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> createProductWithImage(
@@ -48,8 +47,7 @@ public class ProductController {
 			@RequestParam(value = "description", required = false) String description,
 			@RequestParam(value = "gstType", required = false) String gstType,
 			@RequestParam(value = "gstRate", required = false) Float gstRate,
-			@RequestParam("image") MultipartFile imageFile
-	) {
+			@RequestParam("image") MultipartFile imageFile) {
 		try {
 			// ✅ Validate Authorization Header
 			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -91,7 +89,6 @@ public class ProductController {
 			product.setProduct_image(filepath.toString());
 			product.setUser(user); // associate user
 
-			
 			Product savedProduct = productRepo.save(product);
 
 			return ResponseEntity.ok(savedProduct);
@@ -113,7 +110,6 @@ public class ProductController {
 						.body("Missing or invalid Authorization header");
 			}
 
-			
 			String token = authorizationHeader.substring(7);
 			Long userId = jwtService.extractUserId(token);
 
@@ -121,7 +117,6 @@ public class ProductController {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
 			}
 
-			
 			List<Product> products = productRepo.findByUserId(userId);
 
 			return ResponseEntity.ok(products);
@@ -132,41 +127,35 @@ public class ProductController {
 					.body("Error fetching products for user: " + e.getMessage());
 		}
 
-		
 	}
 
 	@GetMapping("/getImage/{productId}")
-public ResponseEntity<?> getProductImage(@PathVariable int productId) {
-    try {
-        // ✅ Fetch the product safely using Optional
-        Product product = productRepo.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+	public ResponseEntity<?> getProductImage(@PathVariable int productId) {
+		try {
 
-        // ✅ Get image path from product
-        String imagePath = product.getProduct_image();
-        Path imageFilePath = Paths.get(imagePath);
+			Product product = productRepo.findById(productId)
+					.orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (!Files.exists(imageFilePath)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
-        }
+			String imagePath = product.getProduct_image();
+			Path imageFilePath = Paths.get(imagePath);
 
-        // ✅ Read image as byte array
-        byte[] imageBytes = Files.readAllBytes(imageFilePath);
+			if (!Files.exists(imageFilePath)) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
+			}
 
-        // ✅ Detect content type
-        String contentType = Files.probeContentType(imageFilePath);
+			byte[] imageBytes = Files.readAllBytes(imageFilePath);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(imageBytes);
+			String contentType = Files.probeContentType(imageFilePath);
 
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error fetching image: " + e.getMessage());
-    }
-}
+			return ResponseEntity.ok()
+					.contentType(MediaType.parseMediaType(contentType))
+					.body(imageBytes);
 
-	
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error fetching image: " + e.getMessage());
+		}
+	}
 
 }

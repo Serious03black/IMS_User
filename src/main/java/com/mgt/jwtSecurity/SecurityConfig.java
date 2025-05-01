@@ -14,7 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -23,61 +24,50 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
-    // Constructor injection for required dependencies
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, 
-                         UserDetailsService userDetailsService) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                          UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
     }
 
-    /* 
-     * Main security configuration
-     * Defines endpoint access rules and JWT filter setup
-     */
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:4200")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+        };
+    }
+
+    @SuppressWarnings("removal")
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Disable CSRF (not needed for stateless JWT)
-            .csrf(csrf -> csrf.disable())
-
-            // Configure endpoint authorization
+            .cors().and()
+            .csrf().disable()
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("api/welcome","api/register", "api/login","api/addProduct","api/showProduct","api/getImage/{productId}").permitAll()
-                
-                // Role-based endpoints
-                .requestMatchers("api/auth/user/userProfile").hasAnyAuthority("electronics","stationary")
-                .requestMatchers("/auth/admin/adminProfile").hasAuthority("ROLE_ADMIN").requestMatchers("/api/addProduct").authenticated()
-                
-                // All other endpoints require authentication
+                .requestMatchers("/api/welcome", "/api/register", "/api/login","/api/getImage/{productId}").permitAll()
+                .requestMatchers("/api/user/**").hasAnyAuthority("electronics", "stationary")
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
             )
-
-            // Stateless session (required for JWT)
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            // Set custom authentication provider
             .authenticationProvider(authenticationProvider())
-            
-            // Add JWT filter before Spring Security's default filter
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    /* 
-     * Password encoder bean (uses BCrypt hashing)
-     * Critical for secure password storage
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /* 
-     * Authentication provider configuration
-     * Links UserDetailsService and PasswordEncoder
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -86,13 +76,8 @@ public class SecurityConfig {
         return provider;
     }
 
-    /* 
-     * Authentication manager bean
-     * Required for programmatic authentication (e.g., in /generateToken)
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
 }
