@@ -1,12 +1,19 @@
 package com.mgt.controller;
 
+import com.mgt.jwtServices.JwtService;
 import com.mgt.model.Customer;
+import com.mgt.model.User;
 import com.mgt.repository.CustomerRepo;
+import com.mgt.repository.UserRepo;
 import com.mgt.serviceimpl.CustomerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Collections;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -19,11 +26,59 @@ public class CustomerController {
     @Autowired
     private CustomerRepo customerRepo;
 
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserRepo userRepo; 
+
+
     @PostMapping("/customers")
     public String saveCustomer(@RequestBody Customer customer) {
         customerService.saveCustomer(customer);
         return "Invoice created successfully to database";
     }
+
+    
+    @PostMapping("/addBill")
+public ResponseEntity<Map<String, String>> saveCustomer(
+        @RequestBody Customer customer,
+        @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+    System.out.println("Received Authorization Header: " + authHeader);
+
+    try {
+        // Validate Authorization Header
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Missing or invalid Authorization header"));
+        }
+
+        // Extract User ID from JWT Token
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token); // Assumes jwtService has this method
+
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Invalid JWT token"));
+        }
+
+        // Fetch Authenticated User
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Associate user with customer
+        customer.setUser(user);
+        customerService.saveCustomer(customer);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Invoice created successfully"));
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Collections.singletonMap("message", "Error saving invoice: " + e.getMessage()));
+    }
+}
+
 
     @GetMapping("/fetchAllBills")
     public List<Customer> getAllCustomers() {
@@ -36,8 +91,7 @@ public class CustomerController {
     }
 
     @GetMapping("/count")
-    public Long countInvoice(){
+    public Long countInvoice() {
         return customerRepo.count();
     }
-
 }

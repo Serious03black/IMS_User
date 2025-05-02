@@ -49,9 +49,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors().and()
-            .csrf().disable()
+            .csrf().disable()    
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/welcome", "/api/register", "/api/login","/api/getImage/{productId}").permitAll()
+                .requestMatchers("/api/welcome", "/api/register", "/api/login","/api/getImage/{productId}").permitAll()   //"/api/getImage/{productId}"
                 .requestMatchers("/api/user/**").hasAnyAuthority("electronics", "stationary")
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()

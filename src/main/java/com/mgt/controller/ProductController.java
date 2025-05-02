@@ -26,6 +26,8 @@ import com.mgt.model.Product;
 @CrossOrigin(origins = "http://localhost:4200")
 public class ProductController {
 
+	// ./mvnw spring-boot:run
+
 	@Autowired
 	private UserRepo userRepo;
 
@@ -48,14 +50,15 @@ public class ProductController {
 			@RequestParam(value = "gstType", required = false) String gstType,
 			@RequestParam(value = "gstRate", required = false) Float gstRate,
 			@RequestParam("image") MultipartFile imageFile) {
+
 		try {
-			// ✅ Validate Authorization Header
+			// Validate Authorization Header
 			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 						.body("Missing or invalid Authorization header");
 			}
 
-			// ✅ Extract User ID from JWT Token
+			// Extract User ID from JWT Token
 			String token = authorizationHeader.substring(7);
 			Long userId = jwtService.extractUserId(token); // Assumes your jwtService has this method
 
@@ -63,16 +66,16 @@ public class ProductController {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
 			}
 
-			// ✅ Fetch Authenticated User
+			// Fetch Authenticated User
 			User user = userRepo.findById(userId)
 					.orElseThrow(() -> new RuntimeException("User not found"));
 
-			// ✅ Validate Image
+			// Validate Image
 			if (imageFile == null || imageFile.isEmpty()) {
 				return ResponseEntity.badRequest().body("Image file is required");
 			}
 
-			// ✅ Save Image File
+			// Save Image File
 			Files.createDirectories(Paths.get(uploadDir)); // Make sure uploadDir is defined in your class
 			String filename = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
 			Path filepath = Paths.get(uploadDir, filename);
@@ -104,7 +107,7 @@ public class ProductController {
 	public ResponseEntity<?> getProductsByUser(
 			@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 		try {
-			// ✅ Validate Authorization Header
+			// Validate Authorization Header
 			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 						.body("Missing or invalid Authorization header");

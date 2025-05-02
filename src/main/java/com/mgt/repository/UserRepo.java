@@ -15,7 +15,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     @SuppressWarnings("null")
-    Optional<User> findById(Long categoryId);
+    Optional<User> findById(int userId);
 
     
 }
