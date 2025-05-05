@@ -31,6 +31,10 @@ public class User {
 	@JsonManagedReference
 	private List<Product> products;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@JsonManagedReference
+	private List<Customer> customers;
+
 	@Enumerated(EnumType.STRING)
 	private Status status = Status.PENDING;
 
@@ -105,29 +109,28 @@ public class User {
 		this.products = products;
 	}
 
-	@Override
-	public String toString() {
-		return "User [id=" + id + ", full_name=" + full_name + ", store_type=" + store_type + ", email=" + email
-				+ ", password=" + password + ", products=" + products + ", status=" + status + ", confirm_password="
-				+ confirm_password + ", getId()=" + getId() + ", getFull_name()=" + getFull_name()
-				+ ", getStore_type()=" + getStore_type() + ", getEmail()=" + getEmail() + ", getPassword()="
-				+ getPassword() + ", getConfirm_password()=" + getConfirm_password() + ", getClass()=" + getClass()
-				+ ", getStatus()=" + getStatus() + ", getProducts()=" + getProducts() + ", hashCode()=" + hashCode()
-				+ ", toString()=" + super.toString() + "]";
+	public List<Customer> getCustomers() {
+		return customers;
+	}
+
+	public void setCustomers(List<Customer> customers) {
+		this.customers = customers;
 	}
 
 	public User(Long id, String full_name, String store_type, String email, String password, List<Product> products,
-			Status status, String confirm_password) {
+			List<Customer> customers, Status status, String confirm_password) {
 		this.id = id;
 		this.full_name = full_name;
 		this.store_type = store_type;
 		this.email = email;
 		this.password = password;
 		this.products = products;
+		this.customers = customers;
 		this.status = status;
 		this.confirm_password = confirm_password;
 	}
 
+	
 	
 	
 }

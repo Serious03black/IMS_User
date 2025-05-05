@@ -80,12 +80,36 @@ public ResponseEntity<Map<String, String>> saveCustomer(
 }
 
 
-    @GetMapping("/fetchAllBills")
-    public List<Customer> getAllCustomers() {
-        return customerService.getAllCustomers();
-    }
+@GetMapping("/fetchAllBillsByUser")
+public ResponseEntity<?> getBillsByUserId(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    try {
+        // Validate Authorization Header
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Missing or invalid Authorization header"));
+        }
 
-    @GetMapping("/customers/{id}")
+        // Extract user ID from JWT
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
+
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Invalid JWT token"));
+        }
+
+        // Fetch customer bills for this user
+        List<Customer> bills = customerRepo.findByUserId(userId);
+        return ResponseEntity.ok(bills);
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Collections.singletonMap("message", "Error fetching bills: " + e.getMessage()));
+    }
+}
+
+
+    @GetMapping("/customers")
     public Customer getCustomerById(@PathVariable int id) {
         return customerService.getCustomerById(id);
     }
