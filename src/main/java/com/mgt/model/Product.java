@@ -14,8 +14,9 @@ public class Product {
 	@Column(name = "product_list_id")
 	private int product_id;
 
-	@Column(name = "product_name")
-	private String product_name;
+	@Column(name = "productName")
+	private String productName;
+
 
 	@Column(name = "product_price")
 	private Float product_price;
@@ -65,6 +66,7 @@ public class Product {
 
 	// Getters and Setters
 
+
 	public int getProduct_id() {
 		return product_id;
 	}
@@ -73,12 +75,12 @@ public class Product {
 		this.product_id = product_id;
 	}
 
-	public String getProduct_name() {
-		return product_name;
+	public String getProductName() {
+		return productName;
 	}
 
-	public void setProduct_name(String product_name) {
-		this.product_name = product_name;
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 
 	public Float getProduct_price() {
@@ -87,14 +89,6 @@ public class Product {
 
 	public void setProduct_price(Float product_price) {
 		this.product_price = product_price;
-	}
-
-	public String getProduct_image() {
-		return product_image;
-	}
-
-	public void setProduct_image(String product_image) {
-		this.product_image = product_image;
 	}
 
 	public String getProduct_category() {
@@ -135,6 +129,14 @@ public class Product {
 
 	public void setGst_rate(Float gst_rate) {
 		this.gst_rate = gst_rate;
+	}
+
+	public String getProduct_image() {
+		return product_image;
+	}
+
+	public void setProduct_image(String product_image) {
+		this.product_image = product_image;
 	}
 
 	public String getProduct_barcode() {

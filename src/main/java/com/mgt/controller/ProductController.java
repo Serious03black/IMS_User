@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.mgt.jwtServices.JwtService;
@@ -83,7 +84,7 @@ public class ProductController {
 			Files.copy(imageFile.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
 
 			Product product = new Product();
-			product.setProduct_name(name);
+			product.setProductName(name);
 			product.setProduct_price(price);
 			product.setProduct_category(category);
 			product.setProduct_available_stock_quantity(quantity);
@@ -199,7 +200,7 @@ public ResponseEntity<?> updateProduct(
                     .body("You do not have permission to update this product");
         }
 
-        product.setProduct_name(name);
+        product.setProductName(name);
         product.setProduct_price(price);
         product.setProduct_category(category);
         product.setProduct_available_stock_quantity(quantity);
@@ -274,6 +275,12 @@ public ResponseEntity<?> deleteProduct(
 
 
 
+
+// Testing Method
+	@GetMapping("/by-name/{name}")
+	public Optional<Product> getProductByName(@PathVariable("name") String name) {
+		return productRepo.findByProductName(name);
+	}
 
 
 }

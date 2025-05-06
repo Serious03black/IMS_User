@@ -85,7 +85,7 @@ public class ProductServiceImpl  {
 			Product existingProduct = optionalProduct.get();
 
 			// Update fields
-			existingProduct.setProduct_name(product.getProduct_name());
+			existingProduct.setProductName(product.getProductName());
 			existingProduct.setProduct_price(product.getProduct_price());
 			existingProduct.setProduct_category(product.getProduct_category());
 			existingProduct.setProduct_available_stock_quantity(product.getProduct_available_stock_quantity());

@@ -73,7 +73,8 @@ public class CustomerController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Collections.singletonMap("message", "Invalid JWT token"));
             }
-    
+
+
             // Fetch Authenticated User
             User user = userRepo.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
@@ -83,8 +84,37 @@ public class CustomerController {
     
             // Save customer and customer products
             customerService.saveCustomer(customer);
-    
-           
+
+            // Handle subarray: Update stock quantities for products
+            List<CustomerProduct> products = customer.getCustomerProductList();
+
+            if (products != null && !products.isEmpty()) {
+                for (CustomerProduct item : products) {
+                    String productName = item.getName();
+                    int quantity = item.getQuantity();
+
+                    System.out.println("Product Name: " + productName);
+                    System.out.println("Product Quantity: " + quantity);
+
+                    Optional<Product> optionalProduct = productRepo.findByProductName(productName);
+
+                    if (optionalProduct.isPresent()) {
+                        Product product = optionalProduct.get();
+                        int currentStock = product.getProduct_available_stock_quantity();
+                        System.out.println("Current Stock: " + currentStock);
+
+                        product.setProduct_available_stock_quantity(currentStock - quantity);
+                        productRepo.save(product);
+
+                        System.out.println("Updated stock for " + productName);
+                    } else {
+                        System.out.println("Product not found with name: " + productName);
+                        // Optionally: throw new RuntimeException("Product not found: " + productName);
+                    }
+                }
+            } else {
+                System.out.println("Product list is null or empty");
+            }
     
             return ResponseEntity.ok(Collections.singletonMap("message", "Invoice created successfully"));
     
@@ -134,4 +164,9 @@ public ResponseEntity<?> getBillsByUserId(@RequestHeader(value = "Authorization"
     public Long countInvoice() {
         return customerRepo.count();
     }
+
+
+
+
+
 }
