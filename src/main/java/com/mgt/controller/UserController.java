@@ -1,6 +1,10 @@
 package com.mgt.controller;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,10 +37,27 @@ public class UserController {
 		return "Welcome this endpoint is not secure";
 	}
 
-	@PostMapping("/register")
-	public String addNewUser(@RequestBody User userInfo) {
-		return service.addUser(userInfo);
-	}
+@PostMapping("/register")
+public ResponseEntity<?> addNewUser(@RequestBody User userInfo) {
+    String result = service.addUser(userInfo);
+
+    if (result.equals("Error: Username already exists!")) {
+       /*  return ResponseEntity
+                .status(HttpStatus.CONFLICT)  // 409 Conflict for duplicates
+                .body(result); */
+
+				return ResponseEntity.
+                ok(Collections.singletonMap("message", "Duplicate entory"));
+    }
+
+    /* return ResponseEntity
+            .status(HttpStatus.CREATED)  // 201 Created
+            .body(result); */
+
+			  return ResponseEntity.ok(Collections.singletonMap("message", "User created successfully"));
+
+}
+
 
 	// Removed the role checks here as they are already managed in SecurityConfig
 

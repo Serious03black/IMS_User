@@ -17,5 +17,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
     @SuppressWarnings("null")
     Optional<User> findById(int userId);
 
+    boolean existsByEmail(String email);
+
+
     
 }
