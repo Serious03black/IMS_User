@@ -5,7 +5,6 @@ import com.mgt.model.Customer;
 import com.mgt.model.CustomerProduct;
 import com.mgt.model.Product;
 import com.mgt.model.User;
-import com.mgt.repository.CustomerProductRepo;
 import com.mgt.repository.CustomerRepo;
 import com.mgt.repository.ProductRepo;
 import com.mgt.repository.UserRepo;
@@ -35,14 +34,10 @@ public class CustomerController {
     private JwtService jwtService;
 
     @Autowired
-    private UserRepo userRepo; 
-
-    @Autowired
-    private CustomerProductRepo customerProductRepo;
+    private UserRepo userRepo;
 
     @Autowired
     private ProductRepo productRepo;
-
 
     @PostMapping("/customers")
     public String saveCustomer(@RequestBody Customer customer) {
@@ -50,110 +45,114 @@ public class CustomerController {
         return "Invoice created successfully to database";
     }
 
-    
     @PostMapping("/addBill")
     public ResponseEntity<Map<String, String>> saveCustomer(
             @RequestBody Customer customer,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
-    
+
         System.out.println("Received Authorization Header: " + authHeader);
-    
+
         try {
             // Validate Authorization Header
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Collections.singletonMap("message", "Missing or invalid Authorization header"));
             }
-    
+
             // Extract User ID from JWT Token
             String token = authHeader.substring(7);
             Long userId = jwtService.extractUserId(token); // Ensure jwtService has this method
-    
+
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Collections.singletonMap("message", "Invalid JWT token"));
             }
 
-
             // Fetch Authenticated User
             User user = userRepo.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
-    
+
             // Associate user with customer
             customer.setUser(user);
-    
+
             // Save customer and customer products
             customerService.saveCustomer(customer);
 
-            // Handle subarray: Update stock quantities for products
+            // Handle subarray: Update stock quantities for each product in the customer's
+            // product list
             List<CustomerProduct> products = customer.getCustomerProductList();
 
             if (products != null && !products.isEmpty()) {
-                for (CustomerProduct item : products) {
-                    String productName = item.getName();
-                    int quantity = item.getQuantity();
+                for (CustomerProduct customerProduct : products) {
+                    String productName = customerProduct.getName();
+                    int orderedQuantity = customerProduct.getQuantity();
 
-                    System.out.println("Product Name: " + productName);
-                    System.out.println("Product Quantity: " + quantity);
+                    System.out.println("Processing Product: " + productName);
+                    System.out.println("Ordered Quantity: " + orderedQuantity);
 
                     Optional<Product> optionalProduct = productRepo.findByProductName(productName);
 
                     if (optionalProduct.isPresent()) {
                         Product product = optionalProduct.get();
                         int currentStock = product.getProduct_available_stock_quantity();
+
                         System.out.println("Current Stock: " + currentStock);
 
-                        product.setProduct_available_stock_quantity(currentStock - quantity);
-                        productRepo.save(product);
-
-                        System.out.println("Updated stock for " + productName);
+                        if (currentStock >= orderedQuantity) {
+                            product.setProduct_available_stock_quantity(currentStock - orderedQuantity);
+                            productRepo.save(product);
+                            System.out.println("Updated stock for " + productName);
+                        } else {
+                            System.out.println("Insufficient stock for product: " + productName);
+                            // Optionally handle insufficient stock (e.g., throw an exception or log an
+                            // error)
+                        }
                     } else {
                         System.out.println("Product not found with name: " + productName);
                         // Optionally: throw new RuntimeException("Product not found: " + productName);
                     }
                 }
             } else {
-                System.out.println("Product list is null or empty");
+                System.out.println("Customer product list is empty or null.");
             }
-    
+
             return ResponseEntity.ok(Collections.singletonMap("message", "Invoice created successfully"));
-    
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error saving invoice: " + e.getMessage()));
         }
     }
-    
 
-@GetMapping("/fetchAllBillsByUser")
-public ResponseEntity<?> getBillsByUserId(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-    try {
-        // Validate Authorization Header
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "Missing or invalid Authorization header"));
+    @GetMapping("/fetchAllBillsByUser")
+    public ResponseEntity<?> getBillsByUserId(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            // Validate Authorization Header
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("message", "Missing or invalid Authorization header"));
+            }
+
+            // Extract user ID from JWT
+            String token = authHeader.substring(7);
+            Long userId = jwtService.extractUserId(token);
+
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("message", "Invalid JWT token"));
+            }
+
+            // Fetch customer bills for this user
+            List<Customer> bills = customerRepo.findByUserId(userId);
+            return ResponseEntity.ok(bills);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Error fetching bills: " + e.getMessage()));
         }
-
-        // Extract user ID from JWT
-        String token = authHeader.substring(7);
-        Long userId = jwtService.extractUserId(token);
-
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "Invalid JWT token"));
-        }
-
-        // Fetch customer bills for this user
-        List<Customer> bills = customerRepo.findByUserId(userId);
-        return ResponseEntity.ok(bills);
-
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Collections.singletonMap("message", "Error fetching bills: " + e.getMessage()));
     }
-}
-
 
     @GetMapping("/customers")
     public Customer getCustomerById(@PathVariable int id) {
@@ -164,9 +163,5 @@ public ResponseEntity<?> getBillsByUserId(@RequestHeader(value = "Authorization"
     public Long countInvoice() {
         return customerRepo.count();
     }
-
-
-
-
 
 }
