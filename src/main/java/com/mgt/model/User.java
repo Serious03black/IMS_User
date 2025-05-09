@@ -24,8 +24,19 @@ public class User {
 	@Column(name = "email" )
 	private String email;
 
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
 	@Column(name = "password")
 	private String password;
+
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
@@ -93,8 +104,8 @@ public class User {
 		return status;
 	}
 
-	public void setStatus(Status status) {
-		this.status = status;
+	public void setStatus(Status active) {
+		this.status = active;
 	}
 
 	public User() {

@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.mgt.model.Role;
 import com.mgt.model.User;
 import com.mgt.repository.UserRepo;
 
@@ -20,6 +21,8 @@ import java.util.function.Function;
 
 @Component
 public class JwtService {
+
+    private Role role;
 
     private final UserRepo userRepo;
 
@@ -39,6 +42,7 @@ public class JwtService {
             User user = optionalUser.get();
             long userId = user.getId(); // Assuming your User model has getUser_id()
             claims.put("userId", userId); // 👈 Add userId into token claims
+            claims.put("role", role);
         }
 
         return createToken(claims, email);
@@ -66,6 +70,11 @@ public class JwtService {
     public Long extractUserId(String token) {
         Claims claims = extractAllClaims(token);
         return claims.get("userId", Long.class);
+    }
+
+    public String extractRole(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("role", String.class);
     }
 
     public Date extractExpiration(String token) {
