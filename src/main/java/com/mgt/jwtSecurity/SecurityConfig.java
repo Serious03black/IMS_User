@@ -53,7 +53,13 @@ public class SecurityConfig {
                 .cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/welcome", "/api/register", "/api/login", "/api/getImage/{productId}")
+                        .requestMatchers(
+                            "/api/welcome", 
+                            "/api/register",
+                             "/api/login",
+                              "/api/getImage/{productId}",
+                              "/api/sendOtp",
+                              "/api/verifyOtp")
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

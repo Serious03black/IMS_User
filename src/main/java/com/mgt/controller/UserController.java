@@ -39,6 +39,9 @@ public class UserController {
     @Autowired
     private UserRepo userRepo;
 
+    
+   
+
     @GetMapping("/welcome")
     public String welcome() {
         return "Welcome this endpoint is not secure";
@@ -65,6 +68,8 @@ public class UserController {
 
             return ResponseEntity.ok(Collections.singletonMap("message", "Duplicate entory"));
         }
+
+       
 
         return ResponseEntity.ok(Collections.singletonMap("message", "User created successfully"));
 
