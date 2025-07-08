@@ -24,19 +24,16 @@ public class User {
 	@Column(name = "email" )
 	private String email;
 
-	public Role getRole() {
-		return role;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
 	@Column(name = "password")
 	private String password;
 
+	@Column(name = "Role")
 	@Enumerated(EnumType.STRING)
 	private Role role;
+
+	@Column(name = "Status")
+	@Enumerated(EnumType.STRING)
+	private Status status = Status.PENDING;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	@JsonManagedReference
@@ -46,11 +43,31 @@ public class User {
 	@JsonManagedReference
 	private List<Customer> customers;
 
-	@Enumerated(EnumType.STRING)
-	private Status status = Status.PENDING;
+	public User() {
+	}
 
-	@Transient
-	private String confirm_password;
+	public User(Long id, String full_name, String store_type, String email, String password, Role role, Status status,
+			List<Product> products, List<Customer> customers) {
+		this.id = id;
+		this.full_name = full_name;
+		this.store_type = store_type;
+		this.email = email;
+		this.password = password;
+		this.role = role;
+		this.status = status;
+		this.products = products;
+		this.customers = customers;
+	}
+
+	
+
+	public User(String full_name, String email, String password, Role role, Status status) {
+		this.full_name = full_name;
+		this.email = email;
+		this.password = password;
+		this.role = role;
+		this.status = status;
+	}
 
 	public Long getId() {
 		return id;
@@ -92,24 +109,20 @@ public class User {
 		this.password = password;
 	}
 
-	public String getConfirm_password() {
-		return confirm_password;
+	public Role getRole() {
+		return role;
 	}
 
-	public void setConfirm_password(String confirm_password) {
-		this.confirm_password = confirm_password;
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
 	public Status getStatus() {
 		return status;
 	}
 
-	public void setStatus(Status active) {
-		this.status = active;
-	}
-
-	public User() {
-		this.status = Status.PENDING;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public List<Product> getProducts() {
@@ -128,19 +141,7 @@ public class User {
 		this.customers = customers;
 	}
 
-	public User(Long id, String full_name, String store_type, String email, String password, List<Product> products,
-			List<Customer> customers, Status status, String confirm_password) {
-		this.id = id;
-		this.full_name = full_name;
-		this.store_type = store_type;
-		this.email = email;
-		this.password = password;
-		this.products = products;
-		this.customers = customers;
-		this.status = status;
-		this.confirm_password = confirm_password;
-	}
-
+	
 	
 	
 	
