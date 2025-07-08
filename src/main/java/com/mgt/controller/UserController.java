@@ -126,7 +126,6 @@ public class UserController {
     }
 
     @GetMapping("/registeredUser")
-    @PreAuthorize("hasRole('ADMIN')")
     public List<User> getMethodName() {
 
         List<User> user = userRepo.findAll();
