@@ -13,7 +13,7 @@ public class CustomerProduct {
     private int productId;
 
     @Column(name="name")
-    private String productName;
+    private String name;
 
     @Column(name="price")
     private double price;
@@ -21,19 +21,19 @@ public class CustomerProduct {
     @Column(name="quantity")
     private int quantity;
 
-    @Column(name="net_amount")
+    @Column(name="netAmount")
     private double netAmount;
 
-    @Column(name="type_of_GST")
-    private String typeOfGST;
+    @Column(name="gstType")
+    private String gstType;
 
     @Column(name="tax")
-    private double tax;
+    private double gstRate;
 
-    @Column(name="gst")
-    private double gst;
+    @Column(name="gstAmount")
+    private double gstAmount;
 
-    @Column(name="total_amount")
+    @Column(name="totalAmount")
     private double totalAmount;
 
     @ManyToOne
@@ -41,7 +41,21 @@ public class CustomerProduct {
     @JsonBackReference
     private Customer customer;
 
+    public CustomerProduct(){}
 
+    public CustomerProduct(int productId, String name, double price, int quantity, double netAmount, String gstType,
+            double gstRate, double gstAmount, double totalAmount, Customer customer) {
+        this.productId = productId;
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.netAmount = netAmount;
+        this.gstType = gstType;
+        this.gstRate = gstRate;
+        this.gstAmount = gstAmount;
+        this.totalAmount = totalAmount;
+        this.customer = customer;
+    }
 
     public int getProductId() {
         return productId;
@@ -51,12 +65,12 @@ public class CustomerProduct {
         this.productId = productId;
     }
 
-    public String getProductName() {
-        return productName;
+    public String getName() {
+        return name;
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public double getPrice() {
@@ -83,28 +97,28 @@ public class CustomerProduct {
         this.netAmount = netAmount;
     }
 
-    public String getTypeOfGST() {
-        return typeOfGST;
+    public String getGstType() {
+        return gstType;
     }
 
-    public void setTypeOfGST(String typeOfGST) {
-        this.typeOfGST = typeOfGST;
+    public void setGstType(String gstType) {
+        this.gstType = gstType;
     }
 
-    public double getTax() {
-        return tax;
+    public double getGstRate() {
+        return gstRate;
     }
 
-    public void setTax(double tax) {
-        this.tax = tax;
+    public void setGstRate(double gstRate) {
+        this.gstRate = gstRate;
     }
 
-    public double getGst() {
-        return gst;
+    public double getGstAmount() {
+        return gstAmount;
     }
 
-    public void setGst(double gst) {
-        this.gst = gst;
+    public void setGstAmount(double gstAmount) {
+        this.gstAmount = gstAmount;
     }
 
     public double getTotalAmount() {
@@ -123,5 +137,7 @@ public class CustomerProduct {
         this.customer = customer;
     }
 
+    
 
+  
 }

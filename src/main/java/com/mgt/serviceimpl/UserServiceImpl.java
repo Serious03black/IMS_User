@@ -2,13 +2,13 @@ package com.mgt.serviceimpl;
 
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mgt.model.Role;
 import com.mgt.model.User;
 import com.mgt.repository.UserRepo;
+
 @Service
 public class UserServiceImpl {
 
@@ -20,15 +20,15 @@ public class UserServiceImpl {
 		return userRepo.save(user);
 	}
 
-	public User loginUserEmail(String email, String password) {
+/* 	public User loginUserEmail(String email, String password) {
 		User validUser = userRepo.findByEmail(email);
 		if (validUser != null && validUser.getPassword().matches(password)) {
 			return validUser;
 		}
 		return null;
-	}
+	} */
 
-	public boolean deleteUser(Integer id) {
+	public boolean deleteUser(Long id) {
 
 		boolean status = false;
 		if (id != null) {
@@ -37,16 +37,16 @@ public class UserServiceImpl {
 		}
 		return status;
 	}
-
-	public User updatUser(User user) {
-		Optional<User> existingUser = userRepo.findById(user.getId());
-		if(existingUser.isPresent()){
-			return userRepo.save(user);
-		}else{
-			return null;
-		}
-	}
-	public User findById(Integer id) {
+//
+//	public User updatUser(User user) {
+//		Optional<User> existingUser = UserRepo.findById(user.getId());
+//		if(existingUser.isPresent()){
+//			return userRepo.save(user);
+//		}else{
+//			return null;
+//		}
+//	}
+	public User findById(Long id) {
     Optional<User> user = userRepo.findById(id);
     return user.orElse(null);
 }
@@ -54,7 +54,7 @@ public class UserServiceImpl {
 
 	public List<User> getAllUser() {
 
-		return userRepo.findAll();
+		return userRepo.findByRole(Role.USER);
 	}
 
 

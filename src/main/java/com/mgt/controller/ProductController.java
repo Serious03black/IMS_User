@@ -1,134 +1,284 @@
 package com.mgt.controller;
 
-import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import com.mgt.jwtServices.JwtService;
+import com.mgt.model.User;
+import com.mgt.repository.ProductRepo;
+import com.mgt.repository.UserRepo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mgt.model.Product;
-import com.mgt.serviceimpl.ProductServiceImpl;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:4200")
 public class ProductController {
 
+	// ./mvnw spring-boot:run
+
 	@Autowired
-	private ProductServiceImpl productService;
+	private UserRepo userRepo;
+
+	@Autowired
+	private ProductRepo productRepo;
+
+	@Autowired
+	private JwtService jwtService;
+
+	private final String uploadDir = "uploads/products/";
 
 	@PostMapping(value = "/addProduct", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<Map<String, String>> addProduct(@RequestPart("product") String productJson,
-														  @RequestPart("product_image") MultipartFile productImage) {
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<?> createProductWithImage(
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@RequestParam("name") String name,
+			@RequestParam(value = "price", required = false) Float price,
+			@RequestParam(value = "category", required = false) String category,
+			@RequestParam(value = "quantity", required = false) Integer quantity,
+			@RequestParam(value = "description", required = false) String description,
+			@RequestParam(value = "gstType", required = false) String gstType,
+			@RequestParam(value = "gstRate", required = false) Float gstRate,
+			@RequestParam("image") MultipartFile imageFile) {
 
-		System.out.println("Received JSON: " + productJson); // Debugging Line
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		Product product;
 		try {
-			product = objectMapper.readValue(productJson, Product.class);
-		} catch (JsonProcessingException e) {
+			// Validate Authorization Header
+			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body("Missing or invalid Authorization header");
+			}
+
+			// Extract User ID from JWT Token
+			String token = authorizationHeader.substring(7);
+			Long userId = jwtService.extractUserId(token); // Assumes your jwtService has this method
+
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
+			}
+
+			// Fetch Authenticated User
+			User user = userRepo.findById(userId)
+					.orElseThrow(() -> new RuntimeException("User not found"));
+
+			// Validate Image
+			if (imageFile == null || imageFile.isEmpty()) {
+				return ResponseEntity.badRequest().body("Image file is required");
+			}
+
+			// Save Image File
+			Files.createDirectories(Paths.get(uploadDir)); // Make sure uploadDir is defined in your class
+			String filename = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+			Path filepath = Paths.get(uploadDir, filename);
+			Files.copy(imageFile.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
+
+			Product product = new Product();
+			product.setProductName(name);
+			product.setProduct_price(price);
+			product.setProduct_category(category);
+			product.setProduct_available_stock_quantity(quantity);
+			product.setProduct_description(description);
+			product.setGst_type(gstType);
+			product.setGst_rate(gstRate);
+			product.setProduct_image(filepath.toString());
+			product.setUser(user); // associate user
+
+			Product savedProduct = productRepo.save(product);
+
+			return ResponseEntity.ok(savedProduct);
+
+		} catch (Exception e) {
+			e.printStackTrace(); // Replace with a logger in production
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error while creating product: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/showProduct")
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<?> getProductsByUser(
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+		try {
+			// Validate Authorization Header
+			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body("Missing or invalid Authorization header");
+			}
+
+			String token = authorizationHeader.substring(7);
+			Long userId = jwtService.extractUserId(token);
+
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
+			}
+
+			List<Product> products = productRepo.findByUserId(userId);
+
+			return ResponseEntity.ok(products);
+
+		} catch (Exception e) {
 			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(Collections.singletonMap("message", "Invalid product JSON format"));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error fetching products for user: " + e.getMessage());
 		}
 
-		// Process product & image
-		boolean status = productService.addPro(product, productImage);
-
-		Map<String, String> response = new HashMap<String, String>();
-		response.put("message", status ? "Product added successfully." : "Failed to add product.");
-		return ResponseEntity.status(status ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST).body(response);
 	}
 
-	@GetMapping("/getProduct/{product_id}")
-	public ResponseEntity<Product> getProductById(@PathVariable("product_id") int id) {
-		Product product = productService.getProductById(id);
-		if (product != null) {
-			return ResponseEntity.ok(product);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
-	}
-
-	private static final String UPLOAD_DIR = "C:/MGT/uploads/";
-
-	@GetMapping("/getImageByProductId/{product_id}")
-	public ResponseEntity<Resource> getImageByProductId(@PathVariable("product_id") int productId) throws IOException {
-		// Fetch the product from the database
-		Product product = productService.getProductById(productId);
-
-		if (product == null || product.getProduct_image() == null || product.getProduct_image().isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
-
-		// Ensure the stored image path is only a filename, not a full path
-		String imageName = Paths.get(product.getProduct_image()).getFileName().toString();
-
-		// Construct the correct absolute path
-		Path imagePath = Paths.get(UPLOAD_DIR, imageName).normalize(); // Normalize to fix path issues
-
-		// Check if file exists
-		Resource resource = new UrlResource(imagePath.toUri());
-		if (resource.exists() && resource.isReadable()) {
-			return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG) // Change dynamically if needed
-					.body(resource);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
-	}
-
-	@GetMapping("/getProduct")
-	public List<Product> getProduct() {
-		return productService.getAllPro();
-	}
-
-	@PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<Product> updateProduct(@RequestPart("product") String productJson,
-												 @RequestPart(value = "product_image", required = false) MultipartFile image) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		Product product;
+	@GetMapping("/getImage/{productId}")
+	public ResponseEntity<?> getProductImage(@PathVariable int productId) {
 		try {
-			product = objectMapper.readValue(productJson, Product.class);
-		} catch (JsonProcessingException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-		}
 
-		Product updatedProduct = productService.updatePro(product, image);
-		return ResponseEntity.ok(updatedProduct);
+			Product product = productRepo.findById(productId)
+					.orElseThrow(() -> new RuntimeException("Product not found"));
+
+			String imagePath = product.getProduct_image();
+			Path imageFilePath = Paths.get(imagePath);
+
+			if (!Files.exists(imageFilePath)) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
+			}
+
+			byte[] imageBytes = Files.readAllBytes(imageFilePath);
+
+			String contentType = Files.probeContentType(imageFilePath);
+
+			return ResponseEntity.ok()
+					.contentType(MediaType.parseMediaType(contentType))
+					.body(imageBytes);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error fetching image: " + e.getMessage());
+		}
 	}
 
-	@DeleteMapping("/deleteProduct/{product_id}")
-	public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable("product_id") Integer product_id) {
-		boolean status = productService.deletePro(product_id);
-		Map<String, String> response = new HashMap<>();
-		if (status) {
-			response.put("message", "Product deleted successfully.");
-			return ResponseEntity.ok().body(response);
-		} else {
-			response.put("error", "Product not found.");
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	@PutMapping(value = "/updateProduct/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<?> updateProduct(
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@PathVariable("productId") int productId,
+			@RequestParam("name") String name,
+			@RequestParam(value = "price", required = false) Float price,
+			@RequestParam(value = "category", required = false) String category,
+			@RequestParam(value = "quantity", required = false) Integer quantity,
+			@RequestParam(value = "description", required = false) String description,
+			@RequestParam(value = "gstType", required = false) String gstType,
+			@RequestParam(value = "gstRate", required = false) Float gstRate,
+			@RequestParam(value = "image", required = false) MultipartFile imageFile) {
+
+		try {
+			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body("Missing or invalid Authorization header");
+			}
+
+			String token = authorizationHeader.substring(7);
+			Long userId = jwtService.extractUserId(token);
+
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
+			}
+
+			Product product = productRepo.findById(productId)
+					.orElseThrow(() -> new RuntimeException("Product not found"));
+
+			// Only allow update if product belongs to the user
+			if (!product.getUser().getId().equals(userId)) {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN)
+						.body("You do not have permission to update this product");
+			}
+
+			product.setProductName(name);
+			product.setProduct_price(price);
+			product.setProduct_category(category);
+			product.setProduct_available_stock_quantity(quantity);
+			product.setProduct_description(description);
+			product.setGst_type(gstType);
+			product.setGst_rate(gstRate);
+
+			if (imageFile != null && !imageFile.isEmpty()) {
+				Files.createDirectories(Paths.get(uploadDir));
+				String filename = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+				Path filepath = Paths.get(uploadDir, filename);
+				Files.copy(imageFile.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
+				product.setProduct_image(filepath.toString());
+			}
+
+			productRepo.save(product);
+
+			return ResponseEntity.ok(Map.of("status", "error", "message", "Product updated sucssesfully"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error updating product: " + e.getMessage());
 		}
 	}
+
+	@DeleteMapping("/deleteProduct/{productId}")
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<?> deleteProduct(
+			@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+			@PathVariable("productId") int productId) {
+		try {
+			// Validate Authorization Header
+			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body(Map.of("status", "error", "message", "Missing or invalid Authorization header"));
+			}
+
+			// Extract User ID
+			String token = authorizationHeader.substring(7);
+			Long userId = jwtService.extractUserId(token);
+
+			if (userId == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body(Map.of("status", "error", "message", "Invalid JWT token"));
+			}
+
+			// Find Product
+			Product product = productRepo.findById(productId)
+					.orElseThrow(() -> new RuntimeException("Product not found"));
+
+			// Delete Image from File System
+			String imagePath = product.getProduct_image();
+			if (imagePath != null) {
+				Path imageFilePath = Paths.get(imagePath);
+				Files.deleteIfExists(imageFilePath);
+			}
+
+			// Delete Product
+			productRepo.delete(product);
+
+			return ResponseEntity.ok(Map.of(
+					"status", "success",
+					"message", "Product deleted successfully"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("status", "error", "message", "Error deleting product: " + e.getMessage()));
+		}
+	}
+
+	// Testing Method
+	@GetMapping("/by-name/{name}")
+	public Optional<Product> getProductByName(@PathVariable("name") String name) {
+		return productRepo.findByProductName(name);
+	}
+
 }
