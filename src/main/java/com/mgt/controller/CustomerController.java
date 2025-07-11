@@ -9,15 +9,14 @@ import com.mgt.repository.CustomerRepo;
 import com.mgt.repository.ProductRepo;
 import com.mgt.repository.UserRepo;
 import com.mgt.serviceimpl.CustomerServiceImpl;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Collections;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -39,14 +38,8 @@ public class CustomerController {
     @Autowired
     private ProductRepo productRepo;
 
-    @PostMapping("/customers")
-    public String saveCustomer(@RequestBody Customer customer) {
-        customerService.saveCustomer(customer);
-        return "Invoice created successfully to database";
-    }
-
     @PostMapping("/addBill")
-    public ResponseEntity<Map<String, String>> saveCustomer(
+    public ResponseEntity<?> saveCustomer(
             @RequestBody Customer customer,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
@@ -61,7 +54,7 @@ public class CustomerController {
 
             // Extract User ID from JWT Token
             String token = authHeader.substring(7);
-            Long userId = jwtService.extractUserId(token); // Ensure jwtService has this method
+            Long userId = jwtService.extractUserId(token); // Ensure this method is correct!
 
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -78,42 +71,32 @@ public class CustomerController {
             // Save customer and customer products
             customerService.saveCustomer(customer);
 
-            // Handle subarray: Update stock quantities for each product in the customer's
-            // product list
-            List<CustomerProduct> products = customer.getCustomerProductList();
+            // Handle subarray: Update stock quantities
+            if (customer.getCustomerProductList() != null) {
+                for (CustomerProduct customerProduct : customer.getCustomerProductList()) {
+                    System.out.println(
+                            "Product ID: " + customerProduct.getProductId() +
+                            ", Name: " + customerProduct.getName() +
+                            ", Quantity: " + customerProduct.getQuantity());
+                    // Find matching product in user's products
+                    Product matchingProduct = user.getProducts().stream()
+                            .filter(p -> p.getProductName().equals(customerProduct.getName()))
+                            .findFirst()
+                            .orElse(null);
 
-            if (products != null && !products.isEmpty()) {
-                for (CustomerProduct customerProduct : products) {
-                    String productName = customerProduct.getName();
-                    int orderedQuantity = customerProduct.getQuantity();
-
-                    System.out.println("Processing Product: " + productName);
-                    System.out.println("Ordered Quantity: " + orderedQuantity);
-
-                    Optional<Product> optionalProduct = productRepo.findByProductName(productName);
-
-                    if (optionalProduct.isPresent()) {
-                        Product product = optionalProduct.get();
-                        int currentStock = product.getProduct_available_stock_quantity();
-
-                        System.out.println("Current Stock: " + currentStock);
-
-                        if (currentStock >= orderedQuantity) {
-                            product.setProduct_available_stock_quantity(currentStock - orderedQuantity);
-                            productRepo.save(product);
-                            System.out.println("Updated stock for " + productName);
-                        } else {
-                            System.out.println("Insufficient stock for product: " + productName);
-                            // Optionally handle insufficient stock (e.g., throw an exception or log an
-                            // error)
+                    if (matchingProduct != null) {
+                        int newStock = matchingProduct.getProduct_available_stock_quantity() - customerProduct.getQuantity();
+                        if (newStock < 0) {
+                            throw new RuntimeException("Insufficient stock for product: " + matchingProduct.getProductName());
                         }
+                        matchingProduct.setProduct_available_stock_quantity(newStock);
+                        productRepo.save(matchingProduct);
+                        System.out.println("Updated stock for " + matchingProduct.getProductName() + ": " + newStock);
                     } else {
-                        System.out.println("Product not found with name: " + productName);
-                        // Optionally: throw new RuntimeException("Product not found: " + productName);
+                        System.out.println("Product not found in user's products: " + customerProduct.getName());
+                        // Optionally throw an error here
                     }
                 }
-            } else {
-                System.out.println("Customer product list is empty or null.");
             }
 
             return ResponseEntity.ok(Collections.singletonMap("message", "Invoice created successfully"));
@@ -129,13 +112,11 @@ public class CustomerController {
     public ResponseEntity<?> getBillsByUserId(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
-            // Validate Authorization Header
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Collections.singletonMap("message", "Missing or invalid Authorization header"));
             }
 
-            // Extract user ID from JWT
             String token = authHeader.substring(7);
             Long userId = jwtService.extractUserId(token);
 
@@ -144,17 +125,18 @@ public class CustomerController {
                         .body(Collections.singletonMap("message", "Invalid JWT token"));
             }
 
-            // Fetch customer bills for this user
             List<Customer> bills = customerRepo.findByUserId(userId);
             return ResponseEntity.ok(bills);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error fetching bills: " + e.getMessage()));
         }
     }
 
-    @GetMapping("/customers")
+    // ⚠ Fix: add {id} in path to match @PathVariable
+    @GetMapping("/customers/{id}")
     public Customer getCustomerById(@PathVariable int id) {
         return customerService.getCustomerById(id);
     }
@@ -163,5 +145,4 @@ public class CustomerController {
     public Long countInvoice() {
         return customerRepo.count();
     }
-
 }
